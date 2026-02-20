@@ -10,6 +10,8 @@
 #include "esp_log.h"
 #include "esp_event.h"
 
+#include "constants.h"
+
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
@@ -26,12 +28,12 @@ void connect_to_wifi(){
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
 
     wifi_config_t wifi_cfg = {
         .sta = {
-            .ssid = "***",
-            .password = "***"
+            .ssid = WIFI_USER,
+            .password = WIFI_PASS
         },
     };
 

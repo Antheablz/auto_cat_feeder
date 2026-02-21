@@ -5,33 +5,51 @@
 #include "esp_spi_flash.h"
 
 #include "driver/gpio.h"
-// #include "esp_system.h"
+#include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include "esp_event.h"
 
 #include "constants.h"
 
+// static const char* TAG = "MAIN";
+
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        // ESP_ERROR_CHECK(esp_wifi_connect());
-        if (esp_wifi_connect() == ESP_OK) {
-            printf("Connected to wifi\n");
+    assert(event_base == WIFI_EVENT || event_base == IP_EVENT);
+
+
+    switch (event_id) {
+    case WIFI_EVENT_STA_START:
+        {
+            ESP_ERROR_CHECK(esp_wifi_connect());
+            printf("-----> Wifi Connected\n");
+
+            //alternative (and probably correct) way to log
+            // ESP_LOGI(TAG, "-----> Starting Wi-Fi");
         }
-    }
-}
+        break;
 
-void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
-    if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+    case WIFI_EVENT_STA_CONNECTED:
+        {
+            wifi_ap_record_t ap_info;
+            ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&ap_info));
+            printf("-----> Connected to Wifi SSID: %s\n", ap_info.ssid);
+        }
+        break;
 
-        char *ip = ip4addr_ntoa(&event->ip_info.ip);
-        printf("Got ip: %s\n", ip);
-    }
+    case IP_EVENT_STA_GOT_IP:
+        {
+            tcpip_adapter_ip_info_t ip_info;
+            ESP_ERROR_CHECK(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info));
+            printf("-----> Device's IP: %s\n", ip4addr_ntoa(&ip_info.ip));
+        }
+        break;
+    } 
+
 }
 
 void connect_to_wifi(){
-    // for grabbing IP info
+    // for grabbing IP info of the esp chip
     tcpip_adapter_init();
 
     // ESP_ERROR_CHECK is similar to assert. If arg of ESP_ERR_CHECK != ESP_ok, then err msg is printed and abort() is called
@@ -41,7 +59,7 @@ void connect_to_wifi(){
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL));
 
     wifi_config_t wifi_cfg = {
         .sta = {
@@ -54,8 +72,9 @@ void connect_to_wifi(){
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_cfg));
     ESP_ERROR_CHECK(esp_wifi_start());
 
+
     // need to wait and confirm that esp is actually connected to wifi before unregistering events
-    // ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler));
+    // ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler));
     // ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler));
 }
 

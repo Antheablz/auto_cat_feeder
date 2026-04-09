@@ -22,21 +22,29 @@
 ## Getting Started
 
 #### Compilation and Execution
+- Set target:
+    ```
+    idf.py set-target esp32s2
+    ```
 - Make the configuration menu:
     ```
-    make menuconfig
+    idf.py menuconfig
     ```
-- Flash the ESP8266:
+- Build the project:
     ```
-    make flash
+    idf.py build
+    ```
+- Flash onto the device:
+    ```
+    idf.py -p PORT flash
     ```
 - Monitoring activity:
     ```
-    make monitor
+    idf.py -p PORT monitor
     ```
 - Cleanup:
     ```
-    make clean
+    idf.py clean
     ```
 
 #### Useful Commands
@@ -44,13 +52,34 @@
     ```
     ls /dev/tty*
     ```
-- Temporarily overiding sdkconfig python configuration:
+- Activate the environment:
     ```
-    CONFIG_SDK_PYTHON=python3
+    source "/Users/antheablais/.espressif/tools/activate_idf_v6.0.sh"
     ```
 
+#### Mosquitto
+- starting and stopping Mosquitto:
+    ```
+    brew services start mosquitto
+    brew services stop mosquitto
+    ```
+- where the mosquito.conf file is located (on my mac)
+```
+/usr/local/etc/mosquitto/mosquitto.conf
+```
+
 #### Documents
-- [LOLIN D1 mini board](https://www.wemos.cc/en/latest/d1/d1_mini.html)
-- [LOLIN D1 mini board schema](https://www.wemos.cc/en/latest/_static/files/sch_d1_mini_v4.0.0.pdf)
-- [ESP8266 Datasheet](https://documentation.espressif.com/0a-esp8266ex_datasheet_en.pdf)
-- [ESP8266 12E Chip Pinout or the Wemos D1 Mini Pinout??](https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/)
+- [ESP32-S2-Saola-1 board](https://docs.espressif.com/projects/esp-idf/en/v4.3/esp32s2/hw-reference/esp32s2/user-guide-saola-1-v1.2.html)
+- [ESP32-S2-Saola-1 board schematics](https://dl.espressif.com/dl/schematics/ESP32-S2-SAOLA-1_V1.1_schematics.pdf)
+- [ESP32-S2-WROVER Datasheet](https://documentation.espressif.com/esp32-s2-wrover_esp32-s2-wrover-i_datasheet_en.pdf)
+- [ESP32-S2 Get Started](https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32s2/get-started/index.html)
+
+
+install EIM with Package Manager Homebrew: CLI
+Install ESP-IDF Using EIM: Online Installation using EIM CLI
+Build Your First Project: Build from Command Line
+
+After installing the ESP-IDF with the CLI, must activate the environment using:
+    ```
+    source "/Users/antheablais/.espressif/tools/activate_idf_v6.0.sh"
+    ```

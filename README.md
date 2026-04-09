@@ -1,22 +1,16 @@
 # Automatic Cat Feeder
 
 ## Requirements
-- Python 2.7:
-    [Download](https://www.python.org/downloads/release/python-2718/)
-- Toolchain Setup:
-    [Instructions & Download](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/macos-setup.html)
-- ESP8266_RTOS_SDK:
-    [Instructions & Download](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html#start-a-project)
-    - When installing the reqirements, use the following commands inside the SDk directory:
-        ```
-        python -m pip install -U pip pyelftools==0.22
-        python -m pip install --user -r requirements.txt
-        ```
-    - Paths for .bash_profile:
-        ```
-        export PATH=$PATH:$HOME/esp/xtensa-lx106-elf/bin
-        export IDF_PATH=~/esp/ESP8266_RTOS_SDK
-        ```
+- ESP32-S2
+- ESP32-S2-Saola-1 development board
+- Python 3.10 or newer:
+    [Download](https://www.python.org/downloads/)
+- ESP-IDF Installation Manager (EIM) to install ESP-IDF, build tools, and toolchain:
+    [Get Started Documentation](https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32s2/get-started/index.html)
+    - Our specific setup follows:
+        - Install EIM with Package Manager Homebrew: CLI
+        - Install ESP-IDF Using EIM: Online Installation using EIM CLI
+        - Build Your First Project: Build from Command Line
 
 
 ## Getting Started
@@ -73,13 +67,3 @@
 - [ESP32-S2-Saola-1 board schematics](https://dl.espressif.com/dl/schematics/ESP32-S2-SAOLA-1_V1.1_schematics.pdf)
 - [ESP32-S2-WROVER Datasheet](https://documentation.espressif.com/esp32-s2-wrover_esp32-s2-wrover-i_datasheet_en.pdf)
 - [ESP32-S2 Get Started](https://docs.espressif.com/projects/esp-idf/en/v6.0/esp32s2/get-started/index.html)
-
-
-install EIM with Package Manager Homebrew: CLI
-Install ESP-IDF Using EIM: Online Installation using EIM CLI
-Build Your First Project: Build from Command Line
-
-After installing the ESP-IDF with the CLI, must activate the environment using:
-    ```
-    source "/Users/antheablais/.espressif/tools/activate_idf_v6.0.sh"
-    ```

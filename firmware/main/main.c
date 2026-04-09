@@ -36,6 +36,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
             printf("-----> Connected to Wifi SSID: %s\n", ap_info.ssid);
 
             // connect_to_mqtt();
+            start_rest_server();
         }
         break;
 
@@ -85,7 +86,7 @@ void app_main(void) {
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     connect_to_wifi();
-    start_rest_server();
+    // start_rest_server();
 }
 
 

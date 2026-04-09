@@ -44,7 +44,7 @@
 #### Adding External Components
 - Add component to idf_component.yml file:
     ```
-    idf.py add <external component>
+    idf.py add-dependency <external component>
     ```
 - Execute the reconfigure command:
     ```

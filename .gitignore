@@ -1,3 +1,5 @@
 build
 sdkconfig*
 *.FCBak
+*.lock
+managed_components

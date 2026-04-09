@@ -41,6 +41,16 @@
     idf.py clean
     ```
 
+#### Adding External Components
+- Add component to idf_component.yml file:
+    ```
+    idf.py add <external component>
+    ```
+- Execute the reconfigure command:
+    ```
+    idf.py reconfigure
+    ```
+
 #### Useful Commands
 - Finding what port our device is using (Mac):
     ```

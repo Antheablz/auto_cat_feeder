@@ -1,0 +1,6 @@
+#ifndef SERVER_H
+#define SERVER_H
+
+void start_rest_server(void);
+
+#endif /* SERVER_H */

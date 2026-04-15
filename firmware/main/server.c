@@ -8,13 +8,14 @@
 #include "mdns.h"
 #include "esp_http_server.h"
 #include "esp_event.h"
+#include "esp_littlefs.h"
+#include "lwip/apps/netbiosns.h"
 
 #include "server.h"
 
-esp_err_t webpage_files_handler(httpd_req_t *req)
-{
+esp_err_t webpage_files_handler(httpd_req_t *req) {
     // Handle the request
-    // ...
+    httpd_resp_send(req,"HI BEN <3", 9);
 
     // Return ESP_OK if the request was handled successfully
     return ESP_OK;
@@ -23,8 +24,27 @@ esp_err_t webpage_files_handler(httpd_req_t *req)
     // return ESP_FAIL;
 }
 
+void initialize_fs() {
+   esp_vfs_littlefs_conf_t conf = {
+    .base_path = "/littlefs",
+    .partition_label = "www",
+    .format_if_mount_failed = true
+   };
+}
+
+void initialize_mdns() {
+    mdns_init();
+    mdns_hostname_set("esp32s2");
+    mdns_instance_name_set("tmp");
+
+    ESP_ERROR_CHECK(mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0));
+}
+
 void start_rest_server() {
-    
+    initialize_mdns();
+    netbiosns_init();
+    netbiosns_set_name("esp32s2");
+
     // Generate default configuration
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     // Empty handle to http_server
@@ -52,6 +72,7 @@ void start_rest_server() {
         .user_ctx   = NULL
     };
     httpd_register_uri_handler(server, &webpage_files_uri);
+
 
     /* URI handler for turning LED on and off */
 }

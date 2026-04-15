@@ -12,6 +12,7 @@
 #include "lwip/apps/netbiosns.h"
 
 #include "server.h"
+#include "constants.h"
 
 esp_err_t webpage_files_handler(httpd_req_t *req) {
     // Handle the request
@@ -34,7 +35,7 @@ void initialize_fs() {
 
 void initialize_mdns() {
     mdns_init();
-    mdns_hostname_set("esp32s2");
+    mdns_hostname_set(MDNS_HOSTNAME);
     mdns_instance_name_set("tmp");
 
     ESP_ERROR_CHECK(mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0));
@@ -43,7 +44,8 @@ void initialize_mdns() {
 void start_rest_server() {
     initialize_mdns();
     netbiosns_init();
-    netbiosns_set_name("esp32s2");
+    netbiosns_set_name(MDNS_HOSTNAME);
+    initialize_fs();
 
     // Generate default configuration
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();

@@ -4,6 +4,7 @@
 3) idf.py add-dependency joltwallet/LittleFS (small fail safe filesystem for microcontrollers, needed for frontend i think)
 
 */
+#include <fcntl.h>
 #include "esp_log.h"
 #include "mdns.h"
 #include "esp_http_server.h"
@@ -16,7 +17,21 @@
 
 esp_err_t webpage_files_handler(httpd_req_t *req) {
     // Handle the request
-    httpd_resp_send(req,"HI BEN <3", 9);
+    // httpd_resp_send(req,"HI BEN <3", 9);
+
+    
+    printf("-----> URI: %s\n", req->uri);
+    
+
+    int fd = open("/littlefs/index.html", O_RDONLY);
+    if (fd == -1) {
+        printf("-----> COULDNT SERVE HTML\n");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
+        return ESP_FAIL;
+    }
+    else {
+        printf("-----> SERVINGGGGGGGGGG\n");
+    }
 
     // Return ESP_OK if the request was handled successfully
     return ESP_OK;

@@ -28,15 +28,19 @@ esp_err_t webpage_files_handler(httpd_req_t *req) {
 void initialize_fs() {
    esp_vfs_littlefs_conf_t conf = {
     .base_path = "/littlefs",
-    .partition_label = "www",
+    .partition_label = "storage",
     .format_if_mount_failed = true
    };
+
+   ESP_ERROR_CHECK(esp_vfs_littlefs_register(&conf));
+
+   printf("-----> Registered the File System\n");
 }
 
 void initialize_mdns() {
     mdns_init();
     mdns_hostname_set(MDNS_HOSTNAME);
-    mdns_instance_name_set("tmp");
+    // mdns_instance_name_set("tmp");
 
     ESP_ERROR_CHECK(mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0));
 }
@@ -47,9 +51,7 @@ void start_rest_server() {
     netbiosns_set_name(MDNS_HOSTNAME);
     initialize_fs();
 
-    // Generate default configuration
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    // Empty handle to http_server
     httpd_handle_t server = NULL;
 
     config.uri_match_fn = httpd_uri_match_wildcard;

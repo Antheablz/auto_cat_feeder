@@ -15,35 +15,40 @@
 #include "server.h"
 #include "constants.h"
 
+#define SCRATCH_BUFSIZE 1024
+static char scratch[SCRATCH_BUFSIZE];
+
 esp_err_t webpage_files_handler(httpd_req_t *req) {
     // Handle the request
-    // httpd_resp_send(req,"HI BEN <3", 9);
 
-    
-    printf("-----> URI: %s\n", req->uri);
-    
-
-    int fd = open("/littlefs/index.html", O_RDONLY);
+    int fd = open(INDEX_FILE_PATH, O_RDONLY);
     if (fd == -1) {
-        printf("-----> COULDNT SERVE HTML\n");
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open file");
         return ESP_FAIL;
     }
-    else {
-        printf("-----> SERVINGGGGGGGGGG\n");
+
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
+
+    ssize_t bytes_read = 0;
+    while ((bytes_read = read(fd, scratch, SCRATCH_BUFSIZE)) > 0) {
+
+        if (httpd_resp_send_chunk(req, scratch, bytes_read) != ESP_OK) {
+            close(fd);
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read file");
+            return ESP_FAIL;
+        }
     }
 
-    // Return ESP_OK if the request was handled successfully
+    close(fd);
+    httpd_resp_send_chunk(req, NULL, 0);
+    printf("-----> Served HTML File\n");
     return ESP_OK;
-
-    // Return an error code to close the connection
-    // return ESP_FAIL;
 }
 
 void initialize_fs() {
    esp_vfs_littlefs_conf_t conf = {
-    .base_path = "/littlefs",
-    .partition_label = "storage",
+    .base_path = BASE_PATH,
+    .partition_label = PARTITION_LABEL,
     .format_if_mount_failed = true
    };
 

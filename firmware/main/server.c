@@ -4,6 +4,7 @@
 3) idf.py add-dependency joltwallet/LittleFS (small fail safe filesystem for microcontrollers, needed for frontend i think)
 
 */
+#include <string.h>
 #include <fcntl.h>
 #include "esp_log.h"
 #include "mdns.h"
@@ -15,10 +16,39 @@
 #include "server.h"
 #include "constants.h"
 
+#define CHECK_FILE_EXTENSION(filename, ext) (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 #define SCRATCH_BUFSIZE 1024
+
 static char scratch[SCRATCH_BUFSIZE];
 
-esp_err_t webpage_files_handler(httpd_req_t *req) {
+esp_err_t webpage_css_handler(httpd_req_t *req) {
+    // Handle the request
+
+    int fd = open(CSS_FILE_PATH, O_RDONLY);
+    if (fd == -1) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open file");
+        return ESP_FAIL;
+    }
+
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/css"));
+
+    ssize_t bytes_read = 0;
+    while ((bytes_read = read(fd, scratch, SCRATCH_BUFSIZE)) > 0) {
+
+        if (httpd_resp_send_chunk(req, scratch, bytes_read) != ESP_OK) {
+            close(fd);
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read file");
+            return ESP_FAIL;
+        }
+    }
+
+    close(fd);
+    httpd_resp_send_chunk(req, NULL, 0);
+    printf("-----> Served CSS File\n");
+    return ESP_OK;
+}
+
+esp_err_t webpage_html_handler(httpd_req_t *req) {
     // Handle the request
 
     int fd = open(INDEX_FILE_PATH, O_RDONLY);
@@ -80,7 +110,6 @@ void start_rest_server() {
 
     if (httpd_start(&server, &config) != ESP_OK) {
         printf("-----> Server failed to start!\n");
-        //free rest_context var
         //return an error. eventually set xEventGroupWaitBits thing or event off?
         //look into the built in esp_http_server_event_id_t for event handling??
     }
@@ -88,14 +117,25 @@ void start_rest_server() {
     printf("-----> Server Started\n");
 
     //now we register uri handlers
-    /* URI handler for getting web server files */
-    httpd_uri_t webpage_files_uri= {
-        .uri        = "/*",
+    /* URI handler for getting web server html file */
+    httpd_uri_t webpage_html_uri= {
+        .uri        = "/",
+        // .uri        = "/index.html",
         .method     = HTTP_GET,
-        .handler    = webpage_files_handler,
+        .handler    = webpage_html_handler,
         .user_ctx   = NULL
     };
-    httpd_register_uri_handler(server, &webpage_files_uri);
+    httpd_register_uri_handler(server, &webpage_html_uri);
+
+
+    /* URI handler for getting  web server css file */
+    httpd_uri_t webpage_css_uri= {
+        .uri        = "/style.css",
+        .method     = HTTP_GET,
+        .handler    = webpage_css_handler,
+        .user_ctx   = NULL
+    };
+    httpd_register_uri_handler(server, &webpage_css_uri);
 
 
     /* URI handler for turning LED on and off */

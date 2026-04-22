@@ -8,7 +8,9 @@
 
 #define BASE_PATH "/littlefs"
 #define PARTITION_LABEL "storage"
-#define INDEX_FILE_PATH "/littlefs/index.html"
+
+#define HTML_FILE_PATH "/littlefs/index.html"
+#define CSS_FILE_PATH "/littlefs/style.css"
 
 
 #endif

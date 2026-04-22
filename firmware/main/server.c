@@ -59,7 +59,7 @@ esp_err_t webpage_html_handler(httpd_req_t *req) {
     esp_err_t ret = ESP_OK;
 
     ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
-    ret = serve_files(INDEX_FILE_PATH, req);
+    ret = serve_files(HTML_FILE_PATH, req);
 
     printf("-----> Served HTML File\n");
     return ret;
@@ -80,7 +80,6 @@ void initialize_fs() {
 void initialize_mdns() {
     mdns_init();
     mdns_hostname_set(MDNS_HOSTNAME);
-    // mdns_instance_name_set("tmp");
 
     ESP_ERROR_CHECK(mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0));
 }
@@ -110,7 +109,6 @@ void start_rest_server() {
     /* URI handler for getting web server html file */
     httpd_uri_t webpage_html_uri= {
         .uri        = "/",
-        // .uri        = "/index.html",
         .method     = HTTP_GET,
         .handler    = webpage_html_handler,
         .user_ctx   = NULL

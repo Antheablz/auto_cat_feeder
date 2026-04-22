@@ -1,12 +1,36 @@
-body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+* {
+    margin: 0;
+    padding: 0;
+}
 
-.spinner {
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn {
+  width: 200px;
+  height: 200px;
+  font-size: 2rem;
+}
+
+.tmp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#button-on {
+  background-color: green;
+}
+
+#button-off {
+  background-color: red;
+}
+
+/* .spinner {
       width: 200px;
       height: 200px;
       background-color: #3498db;
@@ -29,4 +53,4 @@ body {
       to {
         transform: rotate(360deg);
       }
-    }
+    } */

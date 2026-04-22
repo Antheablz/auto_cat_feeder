@@ -30,19 +30,27 @@ esp_err_t serve_files(const char *filepath, httpd_req_t *req) {
 
     ssize_t bytes_read = 0;
     while ((bytes_read = read(fd, scratch, SCRATCH_BUFSIZE)) > 0) {
-
         if (httpd_resp_send_chunk(req, scratch, bytes_read) != ESP_OK) {
             close(fd);
             httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read file");
             return ESP_FAIL;
         }
-
     }
 
     close(fd);
     httpd_resp_send_chunk(req, NULL, 0);
 
     return ESP_OK;
+}
+
+esp_err_t webpage_html_get_handler(httpd_req_t *req) {
+    esp_err_t ret = ESP_OK;
+
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
+    ret = serve_files(HTML_FILE_PATH, req);
+
+    printf("-----> Served HTML File\n");
+    return ret;
 }
 
 esp_err_t webpage_css_get_handler(httpd_req_t *req) {
@@ -55,14 +63,20 @@ esp_err_t webpage_css_get_handler(httpd_req_t *req) {
     return ret;
 }
 
-esp_err_t webpage_html_get_handler(httpd_req_t *req) {
+esp_err_t webpage_script_get_handler(httpd_req_t *req) {
     esp_err_t ret = ESP_OK;
 
-    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
-    ret = serve_files(HTML_FILE_PATH, req);
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "application/javascript"));
+    ret = serve_files(SCRIPT_FILE_PATH, req);
 
-    printf("-----> Served HTML File\n");
+    printf("-----> Served Script File\n");
     return ret;
+}
+
+esp_err_t webpage_blink_put_handler(httpd_req_t *req) {
+
+
+    return ESP_OK;
 }
 
 void initialize_fs() {
@@ -125,6 +139,22 @@ void start_rest_server() {
     };
     httpd_register_uri_handler(server, &webpage_css_uri);
 
+    /* URI handler for getting  web server css file */
+    httpd_uri_t webpage_script_uri= {
+        .uri        = "/script.js",
+        .method     = HTTP_GET,
+        .handler    = webpage_script_get_handler,
+        .user_ctx   = NULL
+    };
+    httpd_register_uri_handler(server, &webpage_script_uri);
+
 
     /* URI handler for turning LED on and off */
+    httpd_uri_t webpage_blink_uri= {
+        .uri        = "/blink",
+        .method     = HTTP_PUT,
+        .handler    = webpage_blink_put_handler,
+        .user_ctx   = NULL
+    };
+    httpd_register_uri_handler(server, &webpage_blink_uri);
 }

@@ -45,7 +45,7 @@ esp_err_t serve_files(const char *filepath, httpd_req_t *req) {
     return ESP_OK;
 }
 
-esp_err_t webpage_css_handler(httpd_req_t *req) {
+esp_err_t webpage_css_get_handler(httpd_req_t *req) {
     esp_err_t ret = ESP_OK;
 
     ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/css"));
@@ -55,7 +55,7 @@ esp_err_t webpage_css_handler(httpd_req_t *req) {
     return ret;
 }
 
-esp_err_t webpage_html_handler(httpd_req_t *req) {
+esp_err_t webpage_html_get_handler(httpd_req_t *req) {
     esp_err_t ret = ESP_OK;
 
     ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
@@ -110,7 +110,7 @@ void start_rest_server() {
     httpd_uri_t webpage_html_uri= {
         .uri        = "/",
         .method     = HTTP_GET,
-        .handler    = webpage_html_handler,
+        .handler    = webpage_html_get_handler,
         .user_ctx   = NULL
     };
     httpd_register_uri_handler(server, &webpage_html_uri);
@@ -120,7 +120,7 @@ void start_rest_server() {
     httpd_uri_t webpage_css_uri= {
         .uri        = "/style.css",
         .method     = HTTP_GET,
-        .handler    = webpage_css_handler,
+        .handler    = webpage_css_get_handler,
         .user_ctx   = NULL
     };
     httpd_register_uri_handler(server, &webpage_css_uri);

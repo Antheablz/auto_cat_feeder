@@ -16,21 +16,17 @@
 #include "server.h"
 #include "constants.h"
 
-#define CHECK_FILE_EXTENSION(filename, ext) (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 #define SCRATCH_BUFSIZE 1024
 
 static char scratch[SCRATCH_BUFSIZE];
 
-esp_err_t webpage_css_handler(httpd_req_t *req) {
-    // Handle the request
+esp_err_t serve_files(const char *filepath, httpd_req_t *req) {
 
-    int fd = open(CSS_FILE_PATH, O_RDONLY);
+    int fd = open(filepath, O_RDONLY);
     if (fd == -1) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open file");
         return ESP_FAIL;
     }
-
-    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/css"));
 
     ssize_t bytes_read = 0;
     while ((bytes_read = read(fd, scratch, SCRATCH_BUFSIZE)) > 0) {
@@ -40,39 +36,33 @@ esp_err_t webpage_css_handler(httpd_req_t *req) {
             httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read file");
             return ESP_FAIL;
         }
+
     }
 
     close(fd);
     httpd_resp_send_chunk(req, NULL, 0);
-    printf("-----> Served CSS File\n");
+
     return ESP_OK;
 }
 
-esp_err_t webpage_html_handler(httpd_req_t *req) {
-    // Handle the request
+esp_err_t webpage_css_handler(httpd_req_t *req) {
+    esp_err_t ret = ESP_OK;
 
-    int fd = open(INDEX_FILE_PATH, O_RDONLY);
-    if (fd == -1) {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open file");
-        return ESP_FAIL;
-    }
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/css"));
+    ret = serve_files(CSS_FILE_PATH, req);
+
+    printf("-----> Served CSS File\n");
+    return ret;
+}
+
+esp_err_t webpage_html_handler(httpd_req_t *req) {
+    esp_err_t ret = ESP_OK;
 
     ESP_ERROR_CHECK(httpd_resp_set_type(req, "text/html"));
+    ret = serve_files(INDEX_FILE_PATH, req);
 
-    ssize_t bytes_read = 0;
-    while ((bytes_read = read(fd, scratch, SCRATCH_BUFSIZE)) > 0) {
-
-        if (httpd_resp_send_chunk(req, scratch, bytes_read) != ESP_OK) {
-            close(fd);
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read file");
-            return ESP_FAIL;
-        }
-    }
-
-    close(fd);
-    httpd_resp_send_chunk(req, NULL, 0);
     printf("-----> Served HTML File\n");
-    return ESP_OK;
+    return ret;
 }
 
 void initialize_fs() {

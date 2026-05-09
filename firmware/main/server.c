@@ -12,6 +12,7 @@
 #include "esp_event.h"
 #include "esp_littlefs.h"
 #include "lwip/apps/netbiosns.h"
+#include "cJSON.h"
 
 #include "server.h"
 #include "constants.h"
@@ -74,9 +75,33 @@ esp_err_t webpage_script_get_handler(httpd_req_t *req) {
 }
 
 esp_err_t webpage_blink_put_handler(httpd_req_t *req) {
+    esp_err_t ret = ESP_OK;
 
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, "application/json"));
+    int total_len = req->content_len;
+    int cur_len = 0;
+    int received = 0;
 
-    return ESP_OK;
+    printf("total_len: %d\n", total_len);
+
+    while (cur_len < total_len) {
+        received = httpd_req_recv(req, scratch + cur_len, total_len);
+        if (received <= 0) {
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
+            return ESP_FAIL;
+        }
+        cur_len += received;
+    }
+    scratch[total_len] = '\0';
+
+    printf("scratch: %s\n", scratch);
+
+    cJSON *root = cJSON_Parse(scratch);
+    int led_state = cJSON_GetObjectItem(root, "state")->valueint;
+    cJSON_Delete(root);
+    httpd_resp_sendstr(req, "LED PUT successfully");
+
+    return ret;
 }
 
 void initialize_fs() {
@@ -129,7 +154,6 @@ void start_rest_server() {
     };
     httpd_register_uri_handler(server, &webpage_html_uri);
 
-
     /* URI handler for getting  web server css file */
     httpd_uri_t webpage_css_uri= {
         .uri        = "/style.css",
@@ -139,7 +163,7 @@ void start_rest_server() {
     };
     httpd_register_uri_handler(server, &webpage_css_uri);
 
-    /* URI handler for getting  web server css file */
+    /* URI handler for getting  web server script file */
     httpd_uri_t webpage_script_uri= {
         .uri        = "/script.js",
         .method     = HTTP_GET,

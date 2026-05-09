@@ -13,6 +13,7 @@
 #include "esp_littlefs.h"
 #include "lwip/apps/netbiosns.h"
 #include "cJSON.h"
+#include "driver/gpio.h"
 
 #include "server.h"
 #include "constants.h"
@@ -100,6 +101,8 @@ esp_err_t webpage_blink_put_handler(httpd_req_t *req) {
     int led_state = cJSON_GetObjectItem(root, "state")->valueint;
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "LED PUT successfully");
+
+    gpio_set_level(2, led_state);
 
     return ret;
 }

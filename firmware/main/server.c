@@ -76,23 +76,24 @@ esp_err_t webpage_script_get_handler(httpd_req_t *req) {
 }
 
 esp_err_t webpage_blink_put_handler(httpd_req_t *req) {
-    esp_err_t ret = ESP_OK;
-
     ESP_ERROR_CHECK(httpd_resp_set_type(req, "application/json"));
+
     int total_len = req->content_len;
     int cur_len = 0;
-    int received = 0;
+    int received_bytes = 0;
 
     printf("total_len: %d\n", total_len);
 
     while (cur_len < total_len) {
-        received = httpd_req_recv(req, scratch + cur_len, total_len);
-        if (received <= 0) {
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
+        received_bytes = httpd_req_recv(req, scratch, total_len);
+        
+        if (received_bytes <= 0) {
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to recieve value");
             return ESP_FAIL;
         }
-        cur_len += received;
+        cur_len += received_bytes;
     }
+
     scratch[total_len] = '\0';
 
     printf("scratch: %s\n", scratch);
@@ -104,7 +105,7 @@ esp_err_t webpage_blink_put_handler(httpd_req_t *req) {
 
     gpio_set_level(2, led_state);
 
-    return ret;
+    return ESP_OK;
 }
 
 void initialize_fs() {

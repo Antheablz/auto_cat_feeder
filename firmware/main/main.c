@@ -72,7 +72,6 @@ void connect_to_wifi() {
         .sta = {
             .ssid = WIFI_USER,
             .password = WIFI_PASS,
-            // .threshold.authmode = WIFI_AUTH_OPEN,
         },
     };
 
